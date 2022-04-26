@@ -22,7 +22,7 @@ btv1 = gpiobutton(26)
 btv2 = gpiobutton(19)
 btv3 = gpiobutton(4)
 
-
+global frame_no
 global commodity_name
 global batch_no
 global f0
@@ -32,10 +32,25 @@ global f3
 global show_weight
 global total_weight
 global w
-total_weight = 0.0
+global hx
 
-def none():
-    print("")
+total_weight = 0.0
+hx = SimpleHX711(27, 17, 198227, 114496)
+frame_no = 7
+
+
+def unsetbutton():
+    def none():
+        print("")
+    bth1.when_pressed= none
+    bth2.when_pressed= none
+    bth3.when_pressed= none
+    bth4.when_pressed= none
+    bth5.when_pressed= none
+    btv1.when_pressed= none
+    btv2.when_pressed= none
+    btv3.when_pressed= none
+    
 def zero1():
     hx.zero()
 
@@ -61,10 +76,27 @@ def save_record():
     conn.commit()
     conn.close()
 
-def query():
-    def destroy():
-        bth1.when_pressed = query
-        top.destroy()
+def query(no):
+    def destroy(n):
+        global frame_no
+        global w
+        global total_weight
+        if n == 0:
+            bth1.when_pressed = lambda:query(frame_no)
+            btv1.when_pressed = cleanAndExit
+            btv2.when_pressed = batchcode
+            btv3.when_pressed = zero1
+            top.destroy()
+        
+        elif n == 3:
+            btv1.when_pressed = batch
+            bth1.when_pressed = lambda:query(frame_no)
+            btv2.when_pressed = lambda:total(w,total_weight)
+            bth3.when_pressed = save_record
+            bth4.when_pressed = batchcode
+            bth5.when_pressed = main
+            top.destroy()
+            
     conn = sqlite3.connect('weight_recor.db')
     c = conn.cursor()
     c.execute("SELECT *, oid FROM weight")
@@ -79,11 +111,11 @@ def query():
     top.title('Weight Records')
     query_label = Label(top, text = print_records , font=('', 30) )
     query_label.pack()
-    btn = Button(top, text="Close",font=('', 50), command = top.destroy)
+    btn = Button(top, text="Close",font=('', 50), command =lambda:destroy(no))
     btn.pack()
-    bth1.when_pressed = none
-    bth2.when_pressed = destroy
-    
+    unsetbutton()
+    bth2.when_pressed =lambda:destroy(no)
+    print(no)
     conn.commit()
     conn.close()
     
@@ -105,11 +137,19 @@ def commo_dity(cat):
     global f2
     global f3
     global batch_no
+    global frame_no
+    frame_no = 3
+    
     f2.destroy()
     commodity_name = cat
     f3 = Frame(root)
     f3.pack(fill='both', expand=True, padx=0, pady=0, side=TOP)
-
+    unsetbutton()
+    weight1 = Label(f3,text="Weight:-",font = ('', 100))
+    weight1.place(x=0,y=0)
+    weight2 = Label(f3,text="KG",font = ('', 100))
+    weight2.place(x=1200,y=0)
+    
     my_label = Label(f3, text=f"Batch No.      :- {batch_no}", font=('', 50))
     my_label.place(x=250, y=175)
     my_label1 = Label(f3, text=f"Commodity. :-  {cat}", font=('', 50))
@@ -117,17 +157,32 @@ def commo_dity(cat):
     title = Label(f3, text='Total weight[Kg]', font=('', 70))
     title.place(x=250, y=500)
     back = Button(f3, text=' Back ', fg="red", font=('', 30), pady=20, command=batch)
-    back.place(x=1350, y=0)
+    back.place(x=1475, y=0)
+    btv1.when_pressed = batch
+    
     add_weight = Button(f3, text='Add Weight ', fg="blue", font=('', 30), pady=20, command=lambda:total(w,total_weight))
-    add_weight.place(x=1250, y=470)
+    add_weight.place(x=1350, y=470)
+    btv2.when_pressed = lambda:total(w,total_weight)
+    
+    reset_bt = Button(f3, text='Reset', font=('', 40), pady=20, command=zero1)
+    reset_bt.place(x=1425, y=900)
+    btv3.when_pressed = zero1
+    
     save = Button(f3, text='Save', font=('', 50), pady=20, command=save_record)
-    save.place(x=0, y=900)
-    record = Button(f3, text='Record', font=('', 50), pady=20, command=save_record)
-    record.place(x=270, y=900)
+    save.place(x=270, y=900)
+    bth3.when_pressed = save_record
+    
+    record = Button(f3, text='Record', font=('', 50), pady=20, command=lambda:query(frame_no))
+    record.place(x=0, y=900)
+    bth1.when_pressed = lambda:query(frame_no)
+    
     new = Button(f3, text='New Batch', font=('', 50), pady=20, command=batchcode)
-    new.place(x=630, y=900)
+    new.place(x=680, y=900)
+    bth4.when_pressed = batchcode
+    
     exit_bt = Button(f3, text='Exit', font=('', 50), pady=20, command=main)
     exit_bt.place(x=1100, y=900)
+    bth5.when_pressed = main
 
 def batch():
     global f1
@@ -140,33 +195,43 @@ def batch():
         # f0.destroy()
         f1.destroy()
         f3.destroy()
-
+        
         f2 = Frame(root)
         f2.pack(fill='both', expand=True, padx=0, pady=0, side=TOP)
-
+        unsetbutton()
+        weight1 = Label(f2,text="Weight:-",font = ('', 100))
+        weight1.place(x=0,y=0)
+        weight2 = Label(f2,text="KG",font = ('', 100))
+        weight2.place(x=1200,y=0)
+        
         my_label = Label(f2, text=f"Batch No.  {batch_no}", font=('', 70))
         my_label.place(x=350, y=175)
         my_label = Label(f2, text="Select Commodity", font=('', 70))
         my_label.place(x=250, y=350)
 
-        back = Button(f2, text=' Back ', fg="red", font=('', 50), pady=20, command=batchcode)
-        back.place(x=1350, y=0)
-
+        back = Button(f2, text=' Back ', fg="red", font=('', 30), pady=20, command=batchcode)
+        back.place(x=1475, y=0)
+        btv1.when_pressed = batchcode
+   
         potato = Button(f2, text='Potato', font=('', 50), pady=20, command=lambda: commo_dity("Potato"))
         potato.place(x=0, y=700)
-
+        bth1.when_pressed = lambda: commo_dity("Potato")
+        
         onion = Button(f2, text='Onion', font=('', 50), pady=20, command=lambda: commo_dity("onion"))
         onion.place(x=250, y=700)
-
+        bth2.when_pressed = lambda: commo_dity("onion")
+        
         eggplant = Button(f2, text='Eggplant', font=('', 50), pady=20, command=lambda: commo_dity("eggplant"))
         eggplant.place(x=480, y=700)
-
+        bth3.when_pressed = lambda: commo_dity("eggplant")
+        
         pumpkin = Button(f2, text='Pumpkin', font=('', 50), pady=20, command=lambda: commo_dity("pumpkin"))
         pumpkin.place(x=810, y=700)
-
+        bth4.when_pressed = lambda: commo_dity("pumpkin")
+        
         ladyfinger = Button(f2, text='Ladyfinger', font=('', 50), pady=20, command=lambda: commo_dity("ladyfinger"))
         ladyfinger.place(x=1130, y=700)
-
+        bth5.when_pressed = lambda: commo_dity("ladyfinger")
 
 def batchcode():
     global f0
@@ -200,7 +265,10 @@ def batchcode():
      
     f1 = Frame(root)
     f1.pack(fill='both', expand=True, padx=0, pady=0, side=TOP)
-
+    weight1 = Label(f1,text="Weight:-",font = ('', 100))
+    weight1.place(x=0,y=0)
+    weight2 = Label(f1,text="KG",font = ('', 100))
+    weight2.place(x=1200,y=0)
     my_label = Label(f1, text="Enter Batch No", font=('', 70))
     my_label.place(x=330, y=200)
 
@@ -233,55 +301,90 @@ def batchcode():
     btn_submit.place(x=620, y=720)
 
     back = Button(f1, text=' Back ', fg="red", font=('', 30), pady=20, command=main)
-    back.place(x=1350, y=0)
+    back.place(x=1450, y=0)
 
     nextbtn = Button(f1,  text='Next', fg="blue", font=('', 30), pady=20, command=batch)
-    nextbtn.place(x=1350, y=900)
+    nextbtn.place(x=1450, y=900)
+    unsetbutton()
+    btv1.when_pressed = main
+    
+    btv3.when_pressed = batch
 
 
-def main():
-    global w
-    global f0
-    global f1
-    global show_weight
-    f1.destroy()
-    f2.destroy()
-    f3.destroy()
-    
-    def zero1():
-        hx.zero()
-    
-    def cleanAndExit():
+def cleanAndExit():
         print("Cleaning...")
         #GPIO.cleanup()
         print("Bye!")
         root.destroy()
         root.quit()
-        sys.exit()   
+        sys.exit()  
+
+
+def main():
+    
+    global w
+    global f0
+    global f1
+    global show_weight
+    global frame_no
+    f1.destroy()
+    f2.destroy()
+    f3.destroy()
+    
+    frame_no = 0
+    def zero1():
+        hx.zero()
+      
         
     f0 = Frame(root)
     f0.pack(fill='both', expand=True, padx=0, pady=0, side=TOP)
-    
+    weight1 = Label(f0,text="Weight:-",font = ('', 100))
+    weight1.place(x=0,y=0)
+    weight2 = Label(f0,text="KG",font = ('', 100))
+    weight2.place(x=1200,y=0)
     
     sbtn = Button(f0, text=' End  ', font=('', 40), pady=40, command=cleanAndExit)
-    sbtn.place(x=1350, y=0)
+    sbtn.place(x=1425, y=0)
 
     reset_bt = Button(f0, text='Reset', font=('', 40), pady=20, command=zero1)
-    reset_bt.place(x=1350, y=900)
+    reset_bt.place(x=1425, y=900)
 
     new_batch = Button(f0, text="New Batch", font=('', 40), pady=20, command=batchcode)
-    new_batch.place(x=1250, y=470)
+    new_batch.place(x=1300, y=470)
 
-    record = Button(f0, text='Record', font=('', 50), pady=20, command=query)
+    record = Button(f0, text='Record', font=('', 50), pady=20, command=lambda: query(frame_no))
     record.place(x=270, y=900)
     #title = Label(f0, text='Weight[Kg]', font=('', 50))
     #title.place(x=120, y=100)
-    
-    bth1.when_pressed = query
+    unsetbutton()
+    bth1.when_pressed = lambda:query(frame_no)
     btv1.when_pressed = cleanAndExit
     btv2.when_pressed = batchcode
     btv3.when_pressed = zero1
     
+
+def core():   
+        global w
+    
+        global hx
+        hx.setUnit(Mass.Unit.KG)
+        hx.zero()
+        
+        while True:
+            
+            m = float(hx.weight(1))
+            x = abs(m)
+            w = float('{:.2f}'.format(x))
+            #b.when_pressed = reset1
+            #weight = Label(root,text="Weight :- " + '{:.2f}'.format(w) + "Kg",font = ('', 100))
+            weight = Label(root,text=w,font = ('', 100))
+            weight.place(x=1100,y=0)
+            weight.update()
+    
+            weight.forget()
+
+
+
 
 root = Tk()
 root.geometry("1800x1500")
@@ -299,4 +402,5 @@ f3 = Frame(root)
 f3.pack(fill='both', expand=True, padx=0, pady=0, side=TOP)
 
 main()
+root.after(100,core)
 root.mainloop()
