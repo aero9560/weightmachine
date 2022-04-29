@@ -1,15 +1,18 @@
 from tkinter import *
 from tkinter import messagebox
 from PIL import ImageTk, Image
-import time
 import sys
 import math
 from HX711 import *
 import RPi.GPIO as GPIO
-#from gpiozero import Button
 from signal import pause
 import sqlite3
 from gpiozero import Button as gpiobutton
+from escpos import printer
+from time import *
+from datetime import date
+from datetime import datetime
+
 #GPIO.cleanup()
 # horizontal button
 bth1 = gpiobutton(16)
@@ -33,11 +36,50 @@ global show_weight
 global total_weight
 global w
 global hx
+global dt_string
+now = datetime.now()
+dt_string = now.strftime("%b/%d/%Y %H:%M:%S")
 
 total_weight = 0.0
 hx = SimpleHX711(27, 17, 198227, 114496)
 frame_no = 7
 
+
+def thermal():
+    global commodity_name
+    global batch_no
+    global dt_string
+    global total_weight
+    total= str(total_weight)
+    p= printer.Usb(0x0525, 0xa700, in_ep=0x82, out_ep=0x01)
+    p.set(align='center',density=8)
+    p.image("Bijak.jpeg",high_density_vertical=True,high_density_horizontal=True)
+    p.set(align='center',width=1,height=1,density=8)
+    p.text("Shop\n")
+    p.text("Address\n")
+    p.text("Phone no.\n\n")
+    p.text("DATE:")
+    p.text(dt_string)
+    p.text("\n")
+    p.text("================================\n")
+    p.text("Batch Code:")
+    p.text(batch_no)
+    p.text("\n")
+    p.text("Commodity:")
+    p.text(commodity_name)
+    p.text("\n")
+    p.text("Total Weight:")
+    p.text(total)
+    p.text("\n")
+    p.text("================================\n")
+    p.text("\n")
+    p.text("\n")
+    p.text("\n")
+    p.text("\n")
+    p.text("\n")
+    p.text("\n")
+    p.text("\n")
+    p.cut()
 
 def unsetbutton():
     def none():
@@ -175,6 +217,9 @@ def commo_dity(cat):
     record = Button(f3, text='Record', font=('', 50), pady=20, command=lambda:query(frame_no))
     record.place(x=0, y=900)
     bth1.when_pressed = lambda:query(frame_no)
+    
+    receipt = Button(f3, text='Receipt', font=('', 50), pady=20, command=thermal)
+    receipt.place(x=450, y=900)
     
     new = Button(f3, text='New Batch', font=('', 50), pady=20, command=batchcode)
     new.place(x=680, y=900)
