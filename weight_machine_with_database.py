@@ -1,5 +1,6 @@
 from tkinter import *
 from tkinter import messagebox
+from tkinter import ttk
 from PIL import ImageTk, Image
 import sys
 import math
@@ -140,7 +141,27 @@ def query(no):
             bth4.when_pressed = batchcode
             bth5.when_pressed = main
             top.destroy()
-            
+
+    
+    top = Toplevel()
+    top.geometry("1200x700")
+    top.title('Weight Records')
+    main_frame = Frame(top)
+    main_frame.pack(fill=BOTH, expand=1)
+    
+    my_canvas = Canvas(main_frame)
+    my_canvas.pack(side=LEFT, fill=BOTH, expand=1)
+    
+    my_scrollbar = ttk.Scrollbar(main_frame, orient=VERTICAL, command=my_canvas.yview)
+    my_scrollbar.pack(side=RIGHT, fill=Y)
+    
+    my_canvas.configure(yscrollcommand=my_scrollbar.set)
+    my_canvas.bind('<Configure>', lambda e: my_canvas.configure(scrollregion = my_canvas.bbox("all")))
+    
+    second_frame = Frame(my_canvas)
+    
+    my_canvas.create_window((0,0),window=second_frame, anchor="nw")
+    
     conn = sqlite3.connect('weight_recor.db')
     c = conn.cursor()
     c.execute("SELECT *, oid FROM weight")
@@ -150,16 +171,14 @@ def query(no):
     for record in records:
         print_records += str(record) + "\n"
     
-    top = Toplevel()
-    top.geometry("1500x1200")
-    top.title('Weight Records')
-    query_label = Label(top, text = print_records , font=('', 30) )
+    
+    query_label = Label(second_frame, text = print_records , font=('', 30) )
     query_label.pack()
     btn = Button(top, text="Close",font=('', 50), command =lambda:destroy(no))
-    btn.pack()
+    btn.place(x=970,y=0)
     unsetbutton()
     bth1.when_pressed =lambda:destroy(no)
-    print(no)
+    #print(no)
     conn.commit()
     conn.close()
     
