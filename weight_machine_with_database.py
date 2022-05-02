@@ -132,9 +132,11 @@ def query(no):
         
         elif n == 3:
             btv1.when_pressed = batch
-            bth1.when_pressed = lambda:query(frame_no)
             btv2.when_pressed = lambda:total(w,total_weight)
-            bth3.when_pressed = save_record
+            btv3.when_pressed = zero1
+            bth1.when_pressed = lambda:query(frame_no)
+            bth2.when_pressed = save_record
+            bth3.when_pressed = thermal
             bth4.when_pressed = batchcode
             bth5.when_pressed = main
             top.destroy()
@@ -156,7 +158,7 @@ def query(no):
     btn = Button(top, text="Close",font=('', 50), command =lambda:destroy(no))
     btn.pack()
     unsetbutton()
-    bth2.when_pressed =lambda:destroy(no)
+    bth1.when_pressed =lambda:destroy(no)
     print(no)
     conn.commit()
     conn.close()
@@ -207,26 +209,29 @@ def commo_dity(cat):
     btv2.when_pressed = lambda:total(w,total_weight)
     
     reset_bt = Button(f3, text='Reset', font=('', 40), pady=20, command=zero1)
-    reset_bt.place(x=1425, y=900)
+    reset_bt.place(x=1450, y=900)
     btv3.when_pressed = zero1
-    
-    save = Button(f3, text='Save', font=('', 50), pady=20, command=save_record)
-    save.place(x=270, y=900)
-    bth3.when_pressed = save_record
     
     record = Button(f3, text='Record', font=('', 50), pady=20, command=lambda:query(frame_no))
     record.place(x=0, y=900)
     bth1.when_pressed = lambda:query(frame_no)
     
+    save = Button(f3, text='Save', font=('', 50), pady=20, command=save_record)
+    save.place(x=270, y=900)
+    bth2.when_pressed = save_record
+    
+    
     receipt = Button(f3, text='Receipt', font=('', 50), pady=20, command=thermal)
-    receipt.place(x=450, y=900)
+    receipt.place(x=470, y=900)
+    bth3.when_pressed = thermal
+    
     
     new = Button(f3, text='New Batch', font=('', 50), pady=20, command=batchcode)
-    new.place(x=680, y=900)
+    new.place(x=770, y=900)
     bth4.when_pressed = batchcode
     
     exit_bt = Button(f3, text='Exit', font=('', 50), pady=20, command=main)
-    exit_bt.place(x=1100, y=900)
+    exit_bt.place(x=1170, y=900)
     bth5.when_pressed = main
 
 def batch():
@@ -322,28 +327,28 @@ def batchcode():
 
     btn_del = Button(f1, text="Del",font=('', 30), pady=10, command=delete)
     btn_del.place(x=1000, y=350)
-    btn_1 = Button(f1, text="1",font=('', 30), pady=10, command=lambda: click(1))
-    btn_1.place(x=520, y=620)
-    btn_2 = Button(f1, text="2",font=('', 30), pady=10, command=lambda: click(2))
-    btn_2.place(x=620, y=620)
-    btn_3 = Button(f1, text="3",font=('', 30), pady=10, command=lambda: click(3))
-    btn_3.place(x=720, y=620)
-    btn_4 = Button(f1, text="4",font=('', 30), pady=10, command=lambda: click(4))
-    btn_4.place(x=520, y=520)
-    btn_5 = Button(f1, text="5",font=('', 30), pady=10, command=lambda: click(5))
-    btn_5.place(x=620, y=520)
-    btn_6 = Button(f1, text="6", font=('', 30), pady=10,command=lambda: click(6))
-    btn_6.place(x=720, y=520)
-    btn_7 = Button(f1, text="7",font=('', 30),pady=10, command=lambda: click(7))
-    btn_7.place(x=520, y=420)
-    btn_8 = Button(f1, text="8",font=('', 30),pady=10, command=lambda: click(8))
-    btn_8.place(x=620, y=420)
-    btn_9 = Button(f1, text="9",font=('', 30), pady=10, command=lambda: click(9))
-    btn_9.place(x=720, y=420)
-    btn_0 = Button(f1, text="0",font=('', 30), pady=10, command=lambda: click(0))
-    btn_0.place(x=520, y=720)
-    btn_submit = Button(f1, text="Submit",font=('', 27), pady=10, command=action)
-    btn_submit.place(x=620, y=720)
+    btn_1 = Button(f1, text="1",font=('', 40), pady=20,padx=30, command=lambda: click(1))
+    btn_1.place(x=450, y=720)
+    btn_2 = Button(f1, text="2",font=('', 40), pady=20,padx=30, command=lambda: click(2))
+    btn_2.place(x=600, y=720)
+    btn_3 = Button(f1, text="3",font=('', 40),pady=20,padx=30, command=lambda: click(3))
+    btn_3.place(x=750, y=720)
+    btn_4 = Button(f1, text="4",font=('', 40), pady=20,padx=30, command=lambda: click(4))
+    btn_4.place(x=450, y=570)
+    btn_5 = Button(f1, text="5",font=('', 40),pady=20,padx=30, command=lambda: click(5))
+    btn_5.place(x=600, y=570)
+    btn_6 = Button(f1, text="6", font=('', 40), pady=20,padx=30,command=lambda: click(6))
+    btn_6.place(x=750, y=570)
+    btn_7 = Button(f1, text="7",font=('', 40),pady=20,padx=30, command=lambda: click(7))
+    btn_7.place(x=450, y=420)
+    btn_8 = Button(f1, text="8",font=('', 40),pady=20,padx=30, command=lambda: click(8))
+    btn_8.place(x=600, y=420)
+    btn_9 = Button(f1, text="9",font=('', 40), pady=20,padx=30, command=lambda: click(9))
+    btn_9.place(x=750, y=420)
+    btn_0 = Button(f1, text="0",font=('', 40), pady=20,padx=30, command=lambda: click(0))
+    btn_0.place(x=450, y=870)
+    btn_submit = Button(f1, text="Submit",font=('', 37), pady=20,padx=35, command=action)
+    btn_submit.place(x=600, y=870)
 
     back = Button(f1, text=' Back ', fg="red", font=('', 30), pady=20, command=main)
     back.place(x=1450, y=0)
@@ -419,15 +424,15 @@ def core():
             
             m = float(hx.weight(1))
             x = abs(m)
-            w = float('{:.2f}'.format(x))
+            w = float('{:.1f}'.format(x))
             #b.when_pressed = reset1
             #weight = Label(root,text="Weight :- " + '{:.2f}'.format(w) + "Kg",font = ('', 100))
             weight = Label(root,text=w,font = ('', 100))
             weight.place(x=1100,y=0)
-            weight.update()
+            
     
             weight.forget()
-
+            weight.update()
 
 
 
